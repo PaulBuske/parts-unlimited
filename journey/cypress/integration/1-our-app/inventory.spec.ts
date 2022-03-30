@@ -1,3 +1,5 @@
+import {describe} from "mocha";
+
 const addProduct = (product: string) => {
   cy.findByLabelText("Product to add").type(product);
   cy.findByRole("button").click();
