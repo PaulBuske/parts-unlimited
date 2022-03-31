@@ -1,39 +1,25 @@
-import {describe} from "mocha";
-
 const addProduct = (product: string) => {
   cy.findByLabelText("Product to add").type(product);
   cy.findByRole("button").click();
 }
 
-function viewInventory() {
+function visitTheInventoryPage() {
   cy.visit("http://localhost:8080");
 }
 
-function createAProduct() {
-  addProduct("product1");
+function checkTheInventoryLevel(number: number) {
+  cy.findByText(number).should("exist");
 }
 
-function increaseProductByOneHundred() {
-  cy.findByLabelText("quantity").type("100");
+
+function addToTheInventoryLevel(product: string, number: number) {
+  visitTheInventoryPage();
   cy.findByRole("button", {name: /update/i}).click();
-}
-
-function expectToSeeOneHundred() {
-  cy.findByText("100")
+  cy.findByRole("textbox", {name: /inventory/i}).type(number.toString());
+  checkTheInventoryLevel(product, number);
 }
 
 describe("inventory", () => {
-
-  describe("when I add additional inventory to existing inventory", () =>{
-    it('should display the increased amount for the product', () => {
-      viewInventory();
-      createAProduct();
-      increaseProductByOneHundred();
-      expectToSeeOneHundred();
-        }
-    );
-  })
-
   describe("when adding a product offering", () => {
     it("should display the new product with a default quantity of 0", () => {
       cy.visit("http://localhost:8080");
@@ -41,5 +27,15 @@ describe("inventory", () => {
       cy.findByText("shiny-new-product").should("exist");
       cy.findByText("0").should("exist");
     });
+  });
+
+  describe("when adding adjusting current inventory levels", () => {
+    it("should add to the inventory level", () => {
+      visitTheInventoryPage();
+      addProduct("Product 1");
+      checkTheInventoryLevel("Product 1", 0);
+      addToTheInventoryLevel("Product 1", 100);
+      checkTheInventoryLevel("Product 1", 100);
+    })
   });
 });
